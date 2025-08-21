@@ -17,13 +17,19 @@ import {
   TrendingUp,
   Users,
   Target,
-  Zap
+  Zap,
+  Eye,
+  Grid3X3
 } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Box, MeshDistortMaterial } from "@react-three/drei";
 import { Suspense } from "react";
 import { TaskCard } from "@/components/TaskCard";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
+import { FloatingActionButton } from "@/components/FloatingActionButton";
+import { TaskVisualization3D } from "@/components/TaskVisualization3D";
+import { ConfettiCelebration, useConfetti } from "@/components/ConfettiCelebration";
+import { VoiceCommands } from "@/components/VoiceCommands";
 
 // 3D Floating Cube Component
 function FloatingCube() {
@@ -119,6 +125,11 @@ export default function Dashboard() {
   const [newTask, setNewTask] = useState('');
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | '3d'>('grid');
+  const [showQuickActions, setShowQuickActions] = useState(false);
+
+  // Confetti hook
+  const { isActive: confettiActive, trigger: triggerConfetti } = useConfetti();
 
   const addTask = () => {
     if (newTask.trim()) {
@@ -134,15 +145,26 @@ export default function Dashboard() {
       };
       setTasks([...tasks, task]);
       setNewTask('');
+      
+      // Trigger confetti for new task
+      triggerConfetti('celebration');
     }
   };
 
   const toggleTaskStatus = (taskId: string) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId 
-        ? { ...task, status: task.status === 'completed' ? 'todo' : 'completed' }
-        : task
-    ));
+    setTasks(tasks.map(task => {
+      if (task.id === taskId) {
+        const newStatus = task.status === 'completed' ? 'todo' : 'completed';
+        
+        // Trigger confetti for completed tasks
+        if (newStatus === 'completed') {
+          triggerConfetti('task-completed');
+        }
+        
+        return { ...task, status: newStatus };
+      }
+      return task;
+    }));
   };
 
   const toggleStar = (taskId: string) => {
@@ -151,6 +173,50 @@ export default function Dashboard() {
         ? { ...task, starred: !task.starred }
         : task
     ));
+  };
+
+  const handleQuickActions = () => {
+    setShowQuickActions(!showQuickActions);
+    triggerConfetti('achievement');
+  };
+
+  const handleTaskSelect = (taskId: string) => {
+    // Find and highlight the selected task
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      console.log('Selected task:', task.title);
+      // You could open a modal or navigate to task details here
+    }
+  };
+
+  const handleVoiceCommand = (command: string) => {
+    switch (command) {
+      case 'add':
+        // Focus on the add task input
+        document.querySelector('input[placeholder="Add a new task..."]')?.focus();
+        break;
+      case 'complete':
+        // Complete the first incomplete task
+        const incompleteTask = tasks.find(t => t.status !== 'completed');
+        if (incompleteTask) {
+          toggleTaskStatus(incompleteTask.id);
+        }
+        break;
+      case 'show':
+        setFilter('all');
+        break;
+      case 'search':
+        document.querySelector('input[placeholder="Search tasks..."]')?.focus();
+        break;
+      case 'toggle':
+        setViewMode(viewMode === 'grid' ? '3d' : 'grid');
+        break;
+      case 'celebrate':
+        triggerConfetti('celebration');
+        break;
+      default:
+        break;
+    }
   };
 
   const filteredTasks = tasks.filter(task => {
@@ -171,10 +237,22 @@ export default function Dashboard() {
 
   const completionRate = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
 
+  // Check for milestones
+  if (stats.completed > 0 && stats.completed % 5 === 0) {
+    // Trigger milestone confetti every 5 completed tasks
+    setTimeout(() => triggerConfetti('milestone'), 1000);
+  }
+
   return (
     <Protected>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-blue-900 dark:to-indigo-900 relative">
         <AnimatedBackground />
+        
+        {/* Confetti Celebration */}
+        <ConfettiCelebration 
+          isActive={confettiActive} 
+          type="celebration"
+        />
         
         {/* Header */}
         <motion.div
@@ -198,16 +276,40 @@ export default function Dashboard() {
                 </h1>
               </div>
               
-              {/* 3D Floating Cube */}
-              <div className="w-16 h-16 opacity-60">
-                <Canvas camera={{ position: [0, 0, 3] }}>
-                  <ambientLight intensity={0.5} />
-                  <directionalLight position={[5, 5, 5]} intensity={1} />
-                  <Suspense fallback={null}>
-                    <FloatingCube />
-                    <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={1} />
-                  </Suspense>
-                </Canvas>
+              {/* View Mode Toggle */}
+              <div className="flex items-center gap-4">
+                <div className="flex bg-white/60 dark:bg-slate-700/60 rounded-lg p-1 backdrop-blur-sm">
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                    className={`${viewMode === 'grid' ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' : 'text-slate-600 dark:text-slate-400'}`}
+                  >
+                    <Grid3X3 className="h-4 w-4 mr-2" />
+                    Grid
+                  </Button>
+                  <Button
+                    variant={viewMode === '3d' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('3d')}
+                    className={`${viewMode === '3d' ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' : 'text-slate-600 dark:text-slate-400'}`}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    3D View
+                  </Button>
+                </div>
+                
+                {/* 3D Floating Cube */}
+                <div className="w-16 h-16 opacity-60">
+                  <Canvas camera={{ position: [0, 0, 3] }}>
+                    <ambientLight intensity={0.5} />
+                    <directionalLight position={[5, 5, 5]} intensity={1} />
+                    <Suspense fallback={null}>
+                      <FloatingCube />
+                      <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={1} />
+                    </Suspense>
+                  </Canvas>
+                </div>
               </div>
             </div>
           </div>
@@ -386,22 +488,30 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Tasks Grid */}
+          {/* Task View */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {filteredTasks.map((task, index) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onToggleStatus={toggleTaskStatus}
-                onToggleStar={toggleStar}
-                index={index}
+            {viewMode === '3d' ? (
+              <TaskVisualization3D 
+                tasks={filteredTasks}
+                onTaskSelect={handleTaskSelect}
               />
-            ))}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredTasks.map((task, index) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onToggleStatus={toggleTaskStatus}
+                    onToggleStar={toggleStar}
+                    index={index}
+                  />
+                ))}
+              </div>
+            )}
           </motion.div>
 
           {/* Empty State */}
@@ -423,6 +533,15 @@ export default function Dashboard() {
             </motion.div>
           )}
         </div>
+
+        {/* Floating Action Button */}
+        <FloatingActionButton
+          onAddTask={addTask}
+          onQuickActions={handleQuickActions}
+        />
+
+        {/* Voice Commands */}
+        <VoiceCommands onCommand={handleVoiceCommand} />
       </div>
     </Protected>
   );
