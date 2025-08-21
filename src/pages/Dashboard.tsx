@@ -15,17 +15,17 @@ export default function Dashboard() {
 
   return (
     <Protected>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-background">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10"
+          className="border-b-2 border-black bg-background sticky top-0 z-10"
         >
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <ListTodo className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">TodoFlow</span>
+              <ListTodo className="h-8 w-8 text-black" />
+              <span className="text-2xl font-bold text-black">TodoFlow</span>
             </Link>
             <UserButton />
           </div>

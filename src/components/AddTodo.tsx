@@ -44,11 +44,15 @@ export function AddTodo() {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="What needs to be done?"
-        className="flex-1"
+        className="flex-1 h-12 rounded-md border-2 border-black focus:ring-2 focus:ring-ring focus:ring-offset-2"
         disabled={isLoading}
       />
-      <Button type="submit" disabled={isLoading || text.trim() === ""}>
-        <Plus className="h-4 w-4" />
+      <Button
+        type="submit"
+        disabled={isLoading || text.trim() === ""}
+        className="h-12 rounded-md border-2 border-black bg-primary text-primary-foreground font-bold shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000] active:shadow-[2px_2px_0px_#000] transition-all duration-200"
+      >
+        <Plus className="h-5 w-5" />
       </Button>
     </motion.form>
   );

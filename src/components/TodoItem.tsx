@@ -69,7 +69,7 @@ export function TodoItem({ id, text, completed }: TodoItemProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="flex items-center gap-3 p-4 bg-card rounded-lg border group hover:shadow-sm transition-shadow"
+      className="flex items-center gap-3 p-4 bg-card rounded-md border-2 border-black group transition-all duration-200 shadow-[4px_4px_0px_#000] hover:shadow-[6px_6px_0px_#000]"
     >
       <Button
         variant="ghost"

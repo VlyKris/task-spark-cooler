@@ -26,28 +26,28 @@ export function TodoList() {
       {/* Filter Tabs */}
       <div className="flex items-center justify-center gap-2">
         <Button
-          variant={filter === "all" ? "default" : "outline"}
+          variant={filter === "all" ? "default" : "ghost"}
           size="sm"
           onClick={() => setFilter("all")}
-          className="gap-2"
+          className="gap-2 rounded-md border-2 border-transparent hover:border-black data-[state=active]:border-black data-[state=active]:bg-primary data-[state=active]:shadow-[2px_2px_0px_#000]"
         >
           <ListTodo className="h-4 w-4" />
           All ({todos.length})
         </Button>
         <Button
-          variant={filter === "active" ? "default" : "outline"}
+          variant={filter === "active" ? "default" : "ghost"}
           size="sm"
           onClick={() => setFilter("active")}
-          className="gap-2"
+          className="gap-2 rounded-md border-2 border-transparent hover:border-black data-[state=active]:border-black data-[state=active]:bg-primary data-[state=active]:shadow-[2px_2px_0px_#000]"
         >
           <Circle className="h-4 w-4" />
           Active ({activeCount})
         </Button>
         <Button
-          variant={filter === "completed" ? "default" : "outline"}
+          variant={filter === "completed" ? "default" : "ghost"}
           size="sm"
           onClick={() => setFilter("completed")}
-          className="gap-2"
+          className="gap-2 rounded-md border-2 border-transparent hover:border-black data-[state=active]:border-black data-[state=active]:bg-primary data-[state=active]:shadow-[2px_2px_0px_#000]"
         >
           <CheckCircle2 className="h-4 w-4" />
           Completed ({completedCount})
